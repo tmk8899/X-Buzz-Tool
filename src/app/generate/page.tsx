@@ -11,7 +11,7 @@ const DEFAULT_INPUT: GeneratePostInput = {
   topic: "",
   target: "副業に興味があるエンジニア（20〜30代）",
   purpose: "フォロワー増加",
-  tone: "casual",
+  tone: "problem",
   maxChars: 140,
   hasCta: true,
 };
