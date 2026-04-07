@@ -45,12 +45,18 @@ const TONE_OPTIONS = [
     label: "教育スレッド型",
     emoji: "🧵",
     hint: "章立て予告 → ステップ解説 → まとめ＋保存CTA",
+  },  
+  {
+    id: "empathy",
+    label: "共感型",
+    emoji: "💬",
+    hint: "悩みや違和感に共感させる構成",
   },
 ];
 
 const PURPOSE_OPTIONS = [
   "フォロワー増加", "エンゲージメント向上", "商品・サービスPR",
-  "実績アピール", "ブランディング", "教育・啓発",
+  "実績アピール", "ブランディング", "教育・啓発","共感",
 ];
 
 const TOPIC_EXAMPLES = ["副業で月10万稼ぐ方法", "TypeScriptの便利テク", "朝活ルーティン"];
