@@ -12,6 +12,7 @@ export interface GeneratePostInput {
   maxChars: number;
   hasCta: boolean;
   persona?: GeneratePersonaContext; // ペルソナ設定（任意）
+  customInstruction?: string;
 }
 
 export interface GeneratedPostResult {

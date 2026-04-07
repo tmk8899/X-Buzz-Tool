@@ -190,7 +190,16 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
         })()}
       </div>
 
-      {/* 文字数 & CTA */}
+      {/* 追加指示 */}
+<div className="flex flex-col gap-2">
+  <FieldLabel>追加指示（任意）</FieldLabel>
+  <TextInput
+    value={(input as any).customInstruction || ""}
+    onChange={(v) => onChange({ customInstruction: v } as any)}
+    placeholder="例：フック強め、共感重視、リライト希望"
+    rows={2}
+  />
+</div>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <FieldLabel>目安文字数</FieldLabel>
@@ -224,7 +233,20 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
         </div>
       </div>
 
-      {/* Submit */}
+      {/* 追加指示 */}
+<div className="flex flex-col gap-2">
+  <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+    追加指示（任意）
+  </label>
+  <textarea
+    value={input.customInstruction || ""}
+    onChange={(e) => onChange({ customInstruction: e.target.value })}
+    placeholder="例：フック強め、共感重視"
+    rows={2}
+    className="w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none"
+    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+  />
+</div>
       <button
         onClick={onSubmit}
         disabled={!input.topic.trim() || loading}
