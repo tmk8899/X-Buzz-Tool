@@ -14,6 +14,7 @@ const DEFAULT_INPUT: GeneratePostInput = {
   tone: "problem",
   maxChars: 140,
   hasCta: true,
+  customInstruction: "",
 };
 
 export default function GeneratePage() {
