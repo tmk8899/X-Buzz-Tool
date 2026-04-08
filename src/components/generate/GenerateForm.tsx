@@ -130,7 +130,7 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
       {/* 目的 */}
       <div className="flex flex-col gap-2">
         <FieldLabel>投稿の目的</FieldLabel>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           {PURPOSE_OPTIONS.map((p) => (
             <button
               key={p}
@@ -151,7 +151,7 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
       {/* バズ投稿型 */}
       <div className="flex flex-col gap-2">
         <FieldLabel>バズ投稿の型</FieldLabel>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           {TONE_OPTIONS.map((t) => {
             const active = input.tone === t.id;
             return (
@@ -206,7 +206,7 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
     rows={2}
   />
 </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <FieldLabel>目安文字数</FieldLabel>
           <div className="flex items-center gap-2">

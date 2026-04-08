@@ -16,10 +16,12 @@ export default function RootLayout({
     <html lang="ja" className="h-full">
       <body className="h-full flex" style={{ background: "#080810" }}>
         {/* Sidebar */}
-        <Sidebar />
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
 
         {/* Main content */}
-        <main className="flex-1 ml-60 min-h-full overflow-y-auto">
+         <main className="flex-1 lg:ml-60 min-h-full overflow-y-auto">
           {children}
         </main>
       </body>
