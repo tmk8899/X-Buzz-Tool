@@ -69,7 +69,8 @@ interface GenerateFormProps {
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">{children}</label>;
+  return <label className="text-sm font-medium text-slate-200 tracking-wide">{children}</label>;
+}
 }
 
 function TextInput({
@@ -77,7 +78,7 @@ function TextInput({
 }: {
   value: string; onChange: (v: string) => void; placeholder: string; rows?: number;
 }) {
-  const cls = "w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none";
+  const cls = "w-full rounded-xl px-4 py-3 text-base text-slate-100 placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none";
   const style = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" };
   return rows
     ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} className={cls} style={style} />
