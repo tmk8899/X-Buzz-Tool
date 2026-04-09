@@ -4,15 +4,48 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import PersonaCard from "@/components/persona/PersonaCard";
+import PersonaForm from "@/components/persona/PersonaForm";
 import { dummyCharacters } from "@/lib/dummy-data";
+import type { Character } from "@/types";
 
 export default function PersonaPage() {
-  const [characters, setCharacters] = useState(dummyCharacters);
+  const [characters, setCharacters] = useState<Character[]>(dummyCharacters);
+  const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<Character | undefined>(undefined);
 
   const handleSelect = (id: string) => {
     setCharacters((prev) =>
       prev.map((c) => ({ ...c, isActive: c.id === id }))
     );
+  };
+
+  const handleEdit = (character: Character) => {
+    setEditTarget(character);
+    setShowForm(true);
+  };
+
+  const handleNew = () => {
+    setEditTarget(undefined);
+    setShowForm(true);
+  };
+
+  const handleSave = (saved: Character) => {
+    setCharacters((prev) => {
+      const idx = prev.findIndex((c) => c.id === saved.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = saved;
+        return next;
+      }
+      return [...prev, saved];
+    });
+    setShowForm(false);
+    setEditTarget(undefined);
+  };
+
+  const handleClose = () => {
+    setShowForm(false);
+    setEditTarget(undefined);
   };
 
   return (
@@ -22,6 +55,7 @@ export default function PersonaPage() {
         description="投稿キャラクターのトーンとスタイルを管理"
         actions={
           <button
+            onClick={handleNew}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
             style={{
               background: "linear-gradient(135deg, #4f8ef7, #9b59f5)",
@@ -41,10 +75,18 @@ export default function PersonaPage() {
             key={char.id}
             character={char}
             onSelect={() => handleSelect(char.id)}
-            onEdit={() => {}}
+            onEdit={() => handleEdit(char)}
           />
         ))}
       </div>
+
+      {showForm && (
+        <PersonaForm
+          initial={editTarget}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
+      )}
     </div>
   );
 }
