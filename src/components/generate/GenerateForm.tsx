@@ -55,8 +55,13 @@ const TONE_OPTIONS = [
 ];
 
 const PURPOSE_OPTIONS = [
-  "フォロワー増加", "エンゲージメント向上", "商品・サービスPR",
-  "実績アピール", "ブランディング", "教育・啓発","共感",
+  { id: "フォロワー増加",    emoji: "👥" },
+  { id: "エンゲージメント向上", emoji: "💬" },
+  { id: "商品・サービスPR",  emoji: "📣" },
+  { id: "実績アピール",      emoji: "🏆" },
+  { id: "ブランディング",    emoji: "✨" },
+  { id: "教育・啓発",       emoji: "📚" },
+  { id: "共感",             emoji: "🤝" },
 ];
 
 const TOPIC_EXAMPLES = ["副業で月10万稼ぐ方法", "TypeScriptの便利テク", "朝活ルーティン"];
@@ -132,20 +137,26 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
       <div className="flex flex-col gap-2">
         <FieldLabel>投稿の目的</FieldLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-          {PURPOSE_OPTIONS.map((p) => (
-            <button
-              key={p}
-              onClick={() => onChange({ purpose: p })}
-              className="py-2 px-3 rounded-xl text-xs text-left transition-all"
-              style={
-                input.purpose === p
-                  ? { background: "rgba(79,142,247,0.15)", border: "1px solid rgba(79,142,247,0.35)", color: "#7aa8f7" }
-                  : { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", color: "#64748b" }
-              }
-            >
-              {p}
-            </button>
-          ))}
+          {PURPOSE_OPTIONS.map((p) => {
+            const active = input.purpose === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => onChange({ purpose: p.id })}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all"
+                style={
+                  active
+                    ? { background: "rgba(79,142,247,0.15)", border: "1px solid rgba(79,142,247,0.4)", boxShadow: "0 0 10px rgba(79,142,247,0.12)" }
+                    : { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }
+                }
+              >
+                <span className="text-base shrink-0">{p.emoji}</span>
+                <span className="text-xs font-semibold" style={{ color: active ? "#7aa8f7" : "#94a3b8" }}>
+                  {p.id}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
