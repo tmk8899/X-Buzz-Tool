@@ -1,6 +1,7 @@
 "use client";
 
 import { Lightbulb, Sparkles, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import type { GeneratePostInput } from "@/types/generate";
 
 const TONE_OPTIONS = [
@@ -64,7 +65,7 @@ const PURPOSE_OPTIONS = [
   { id: "共感",             emoji: "🤝" },
 ];
 
-const TOPIC_EXAMPLES = ["副業で月10万稼ぐ方法", "TypeScriptの便利テク", "朝活ルーティン"];
+const RECENT_KEY = "recentTopics";
 
 interface GenerateFormProps {
   input: GeneratePostInput;
@@ -91,6 +92,25 @@ function TextInput({
 }
 
 export default function GenerateForm({ input, loading, onChange, onSubmit }: GenerateFormProps) {
+  const [recentTopics, setRecentTopics] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_KEY);
+      if (saved) setRecentTopics(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const handleSubmit = () => {
+    const topic = input.topic.trim();
+    if (topic) {
+      const next = [topic, ...recentTopics.filter((t) => t !== topic)].slice(0, 5);
+      setRecentTopics(next);
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+    }
+    onSubmit();
+  };
+
   return (
     <div
       className="rounded-2xl p-6 flex flex-col gap-5"
@@ -108,19 +128,22 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
           placeholder="例: フリーランスエンジニアが月収を上げる3つの習慣"
           rows={2}
         />
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Lightbulb size={11} className="text-yellow-400/60" />
-          {TOPIC_EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              onClick={() => onChange({ topic: ex })}
-              className="text-xs px-2 py-0.5 rounded-full transition-colors hover:text-white"
-              style={{ background: "rgba(79,142,247,0.08)", border: "1px solid rgba(79,142,247,0.2)", color: "#7aa8f7" }}
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
+        {recentTopics.length > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Lightbulb size={11} className="text-yellow-400/60 shrink-0" />
+            <span className="text-[10px] text-slate-500">最近使ったテーマ：</span>
+            {recentTopics.map((ex) => (
+              <button
+                key={ex}
+                onClick={() => onChange({ topic: ex })}
+                className="text-xs px-2 py-0.5 rounded-full transition-colors hover:text-white truncate max-w-[150px]"
+                style={{ background: "rgba(79,142,247,0.08)", border: "1px solid rgba(79,142,247,0.2)", color: "#7aa8f7" }}
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ターゲット */}
@@ -252,7 +275,7 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
       </div>
 
       <button
-        onClick={onSubmit}
+        onClick={handleSubmit}
         disabled={!input.topic.trim() || loading}
         className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 mt-1"
         style={{
