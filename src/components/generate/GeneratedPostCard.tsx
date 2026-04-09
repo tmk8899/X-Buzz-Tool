@@ -18,11 +18,6 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
   const [postError, setPostError] = useState<string | null>(null);
 
   const handlePost = async () => {
-    const stored = localStorage.getItem("xAccountConfig");
-    if (!stored) { setPostError("設定ページでXアカウントを設定してください"); return; }
-    const creds = JSON.parse(stored);
-    if (!creds.apiKey) { setPostError("APIキーが設定されていません"); return; }
-
     const text = [result.hook, result.body, result.cta].filter(Boolean).join("\n\n");
     setPosting(true);
     setPostError(null);
@@ -30,7 +25,7 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
       const res = await fetch("/api/x/post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creds, text }),
+        body: JSON.stringify({ text }),
       });
       const data = await res.json();
       if (data.error) { setPostError(data.error); } else { setPosted(true); }

@@ -1,15 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getXClient } from "@/lib/x-client";
 
-export async function POST(req: NextRequest) {
+export async function GET() {
   try {
-    const { creds, userId } = await req.json();
+    const creds = {
+      apiKey: process.env.X_API_KEY ?? "",
+      apiSecret: process.env.X_API_SECRET ?? "",
+      accessToken: process.env.X_ACCESS_TOKEN ?? "",
+      accessTokenSecret: process.env.X_ACCESS_TOKEN_SECRET ?? "",
+      bearerToken: process.env.X_BEARER_TOKEN ?? "",
+    };
+
     if (!creds.apiKey || !creds.accessToken) {
-      return NextResponse.json({ error: "APIキーが設定されていません" }, { status: 400 });
+      return NextResponse.json({ error: "X APIキーが設定されていません" }, { status: 400 });
     }
 
     const client = getXClient(creds);
-    const tweets = await client.v2.userTimeline(userId, {
+    const me = await client.v2.me();
+    const tweets = await client.v2.userTimeline(me.data.id, {
       max_results: 20,
       "tweet.fields": ["created_at", "public_metrics", "text"],
       exclude: ["retweets", "replies"],

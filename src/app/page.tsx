@@ -15,17 +15,8 @@ export default function DashboardPage() {
   const [xError, setXError] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("xAccountConfig");
-    if (!stored) return;
     try {
-      const creds = JSON.parse(stored);
-      if (!creds.apiKey || !creds.accessToken) return;
-
-      fetch("/api/x/user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(creds),
-      })
+      fetch("/api/x/user")
         .then((r) => r.json())
         .then((data) => {
           if (data.error) { setXError(data.error); return; }
