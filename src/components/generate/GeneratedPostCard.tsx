@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Check, CalendarClock, Hash, Zap, BookOpen, Send, Loader2 } from "lucide-react";
+import { Copy, Check, CalendarClock, Hash, Zap, BookOpen } from "lucide-react";
 import { useState } from "react";
 import type { GeneratedPostResult } from "@/types/generate";
 import NeonBadge from "@/components/ui/NeonBadge";
@@ -10,34 +10,28 @@ interface GeneratedPostCardProps {
   index: number;
 }
 
+function XIcon({ size = 12 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.912-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 export default function GeneratedPostCard({ result, index }: GeneratedPostCardProps) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [posting, setPosting] = useState(false);
-  const [posted, setPosted] = useState(false);
-  const [postError, setPostError] = useState<string | null>(null);
 
-  const handlePost = async () => {
-    const text = [result.hook, result.body, result.cta].filter(Boolean).join("\n\n");
-    setPosting(true);
-    setPostError(null);
-    try {
-      const res = await fetch("/api/x/post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      const data = await res.json();
-      if (data.error) { setPostError(data.error); } else { setPosted(true); }
-    } catch { setPostError("投稿に失敗しました"); }
-    finally { setPosting(false); }
+  const fullText = [result.hook, result.body, result.cta].filter(Boolean).join("\n\n");
+
+  // Xの投稿画面をテキスト入力済みで開く（API不要）
+  const handleOpenX = () => {
+    const encoded = encodeURIComponent(fullText);
+    window.open(`https://x.com/intent/post?text=${encoded}`, "_blank", "noopener,noreferrer");
   };
 
   const handleCopy = async () => {
-    const text = [result.hook, result.body, result.cta]
-      .filter(Boolean)
-      .join("\n\n");
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(fullText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -127,7 +121,7 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
 
       {/* Actions */}
       <div
-        className="px-5 py-3 flex gap-2"
+        className="px-5 py-3 flex gap-2 flex-wrap"
         style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
         <button
@@ -142,6 +136,7 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
           {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
           {copied ? "コピー済み" : "コピー"}
         </button>
+
         <button
           className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80"
           style={{
@@ -153,22 +148,20 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
           <CalendarClock size={12} />
           予約投稿へ
         </button>
+
+        {/* Xに投稿：Web Intentで開く（API不要） */}
         <button
-          onClick={handlePost}
-          disabled={posting || posted}
-          className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80 ml-auto disabled:opacity-50"
-          style={
-            posted
-              ? { background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" }
-              : { background: "rgba(29,161,242,0.1)", border: "1px solid rgba(29,161,242,0.3)", color: "#38bdf8" }
-          }
+          onClick={handleOpenX}
+          className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80 ml-auto font-semibold"
+          style={{
+            background: "rgba(0,0,0,0.7)",
+            border: "1px solid rgba(255,255,255,0.25)",
+            color: "#ffffff",
+          }}
         >
-          {posting ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
-          {posted ? "投稿済み！" : posting ? "投稿中..." : "Xに投稿"}
+          <XIcon size={12} />
+          Xに投稿
         </button>
-        {postError && (
-          <p className="w-full text-[10px] text-red-400 mt-1">{postError}</p>
-        )}
       </div>
     </div>
   );
