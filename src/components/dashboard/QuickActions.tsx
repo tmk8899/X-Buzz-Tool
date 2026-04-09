@@ -33,9 +33,9 @@ const actions = [
     glow: "rgba(0,212,255,0.1)",
   },
   {
-    href: "/character",
+    href: "/persona",
     icon: UserCircle2,
-    label: "キャラ設定",
+    label: "ペルソナ設定",
     description: "投稿スタイルをカスタマイズ",
     color: "#f472b6",
     bg: "rgba(244,114,182,0.08)",

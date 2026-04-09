@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import PersonaCard from "@/components/persona/PersonaCard";
@@ -9,29 +9,48 @@ import XAccountSettings from "@/components/settings/XAccountSettings";
 import { dummyCharacters } from "@/lib/dummy-data";
 import type { Character } from "@/types";
 
-export default function PersonaPage() {
-  const [characters, setCharacters] = useState<Character[]>(() => {
-    // 初期表示時にアクティブペルソナをlocalStorageへ保存
-    if (typeof window !== "undefined") {
-      const active = dummyCharacters.find((c) => c.isActive);
-      if (active && !localStorage.getItem("activePersona")) {
-        localStorage.setItem("activePersona", JSON.stringify({ name: active.name, tone: active.tone, topics: active.topics }));
-      }
+const STORAGE_KEY = "personas";
+
+function loadPersonas(): Character[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved) as Character[];
+  } catch {}
+  return dummyCharacters;
+}
+
+function savePersonas(list: Character[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    const active = list.find((c) => c.isActive);
+    if (active) {
+      localStorage.setItem(
+        "activePersona",
+        JSON.stringify({ name: active.name, tone: active.tone, topics: active.topics })
+      );
     }
-    return dummyCharacters;
-  });
+  } catch {}
+}
+
+export default function PersonaPage() {
+  const [characters, setCharacters] = useState<Character[]>(dummyCharacters);
+  const [mounted, setMounted] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<Character | undefined>(undefined);
 
+  // クライアント側のみlocalStorageから読み込む
+  useEffect(() => {
+    setCharacters(loadPersonas());
+    setMounted(true);
+  }, []);
+
+  const update = (next: Character[]) => {
+    setCharacters(next);
+    savePersonas(next);
+  };
+
   const handleSelect = (id: string) => {
-    setCharacters((prev) => {
-      const next = prev.map((c) => ({ ...c, isActive: c.id === id }));
-      const active = next.find((c) => c.isActive);
-      if (active) {
-        localStorage.setItem("activePersona", JSON.stringify({ name: active.name, tone: active.tone, topics: active.topics }));
-      }
-      return next;
-    });
+    update(characters.map((c) => ({ ...c, isActive: c.id === id })));
   };
 
   const handleEdit = (character: Character) => {
@@ -45,28 +64,27 @@ export default function PersonaPage() {
   };
 
   const handleSave = (saved: Character) => {
-    setCharacters((prev) => {
-      const idx = prev.findIndex((c) => c.id === saved.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = saved;
-        return next;
-      }
-      return [...prev, saved];
-    });
+    const idx = characters.findIndex((c) => c.id === saved.id);
+    const next =
+      idx >= 0
+        ? characters.map((c, i) => (i === idx ? saved : c))
+        : [...characters, saved];
+    update(next);
     setShowForm(false);
     setEditTarget(undefined);
   };
 
   const handleDelete = (id: string) => {
     if (!confirm("このペルソナを削除しますか？")) return;
-    setCharacters((prev) => prev.filter((c) => c.id !== id));
+    update(characters.filter((c) => c.id !== id));
   };
 
   const handleClose = () => {
     setShowForm(false);
     setEditTarget(undefined);
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-full p-4 lg:p-8">
