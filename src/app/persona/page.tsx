@@ -57,6 +57,11 @@ export default function PersonaPage() {
     setEditTarget(undefined);
   };
 
+  const handleDelete = (id: string) => {
+    if (!confirm("このペルソナを削除しますか？")) return;
+    setCharacters((prev) => prev.filter((c) => c.id !== id));
+  };
+
   const handleClose = () => {
     setShowForm(false);
     setEditTarget(undefined);
@@ -90,6 +95,7 @@ export default function PersonaPage() {
             character={char}
             onSelect={() => handleSelect(char.id)}
             onEdit={() => handleEdit(char)}
+            onDelete={() => handleDelete(char.id)}
           />
         ))}
       </div>

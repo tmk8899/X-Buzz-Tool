@@ -6,9 +6,10 @@ interface PersonaCardProps {
   character: Character;
   onSelect: () => void;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
-export default function PersonaCard({ character, onSelect, onEdit }: PersonaCardProps) {
+export default function PersonaCard({ character, onSelect, onEdit, onDelete }: PersonaCardProps) {
   return (
     <div
       className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200"
@@ -84,6 +85,19 @@ export default function PersonaCard({ character, onSelect, onEdit }: PersonaCard
         >
           編集
         </button>
+        {!character.isActive && (
+          <button
+            onClick={onDelete}
+            className="py-2 px-3 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+            style={{
+              background: "rgba(248,113,113,0.08)",
+              border: "1px solid rgba(248,113,113,0.2)",
+              color: "#f87171",
+            }}
+          >
+            削除
+          </button>
+        )}
       </div>
     </div>
   );
