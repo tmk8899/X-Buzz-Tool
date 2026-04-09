@@ -6,7 +6,7 @@ import HistoryFilter from "@/components/history/HistoryFilter";
 import HistoryPostCard from "@/components/history/HistoryPostCard";
 import { dummyPosts } from "@/lib/dummy-data";
 import type { Post, PostStatus } from "@/types";
-import type { ScheduledPost } from "@/types/scheduled-post";
+import { scheduleStore } from "@/lib/schedule-store";
 
 const STORAGE_KEY = "historyPosts";
 
@@ -32,7 +32,7 @@ function savePosts(posts: Post[]) {
 }
 
 // ScheduledPostをPost形式に変換
-function toPost(sp: ScheduledPost): Post {
+function toPost(sp: { id: string; content: string; scheduledAt: string; publishedAt?: string }): Post {
   return {
     id: sp.id,
     content: sp.content,
@@ -57,13 +57,9 @@ export default function HistoryPage() {
     setLocalPosts(loadLocalPosts());
     setMounted(true);
 
-    // 予約中は予約ページのAPIから取得
-    fetch("/api/scheduled-posts?status=scheduled")
-      .then((r) => r.json())
-      .then((data: ScheduledPost[]) => {
-        if (Array.isArray(data)) setScheduledPosts(data.map(toPost));
-      })
-      .catch(() => {});
+    // 予約中はlocalStorageの予約ストアから取得（予約ページと同じデータ）
+    const scheduled = scheduleStore.getAll().filter((p) => p.status === "scheduled");
+    setScheduledPosts(scheduled.map(toPost));
   }, []);
 
   // 全投稿 = localPosts(published/draft) + scheduledPosts

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import ScheduledPostList from "@/components/schedule/ScheduledPostList";
 import ScheduleForm from "@/components/schedule/ScheduleForm";
+import { scheduleStore } from "@/lib/schedule-store";
 import type { ScheduledPost, ScheduledPostStatus } from "@/types/scheduled-post";
 
 const STATUS_TABS: { value: ScheduledPostStatus | "all"; label: string }[] = [
@@ -20,23 +21,20 @@ export default function SchedulePage() {
   const [filterStatus, setFilterStatus] = useState<ScheduledPostStatus | "all">("all");
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<ScheduledPost | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-  // ---------- fetch ----------
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/scheduled-posts");
-      const data = await res.json();
-      setPosts(data);
-    } finally {
-      setLoading(false);
-    }
+  const reload = () => setPosts(scheduleStore.getAll());
+
+  useEffect(() => {
+    reload();
+    setMounted(true);
+    // 30秒ごとに期限チェック（画面を開いたまま投稿時刻を迎えた場合に更新）
+    const timer = setInterval(reload, 30_000);
+    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+  if (!mounted) return null;
 
-  // ---------- derived ----------
   const filtered = filterStatus === "all"
     ? posts
     : posts.filter((p) => p.status === filterStatus);
@@ -46,17 +44,9 @@ export default function SchedulePage() {
     return acc;
   }, {});
 
-  // ---------- handlers ----------
+  // ---- handlers ----
   const handleSaved = (saved: ScheduledPost) => {
-    setPosts((prev) => {
-      const idx = prev.findIndex((p) => p.id === saved.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = saved;
-        return next;
-      }
-      return [...prev, saved];
-    });
+    reload();
     setShowForm(false);
     setEditTarget(undefined);
   };
@@ -66,32 +56,23 @@ export default function SchedulePage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm("この予約投稿を削除しますか？")) return;
-    await fetch(`/api/scheduled-posts/${id}`, { method: "DELETE" });
-    setPosts((prev) => prev.filter((p) => p.id !== id));
+    scheduleStore.delete(id);
+    reload();
   };
 
-  const handleCancel = async (id: string) => {
-    const res = await fetch(`/api/scheduled-posts/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "cancelled" }),
-    });
-    if (res.ok) {
-      const updated: ScheduledPost = await res.json();
-      setPosts((prev) => prev.map((p) => (p.id === id ? updated : p)));
-    }
+  const handleCancel = (id: string) => {
+    scheduleStore.update(id, { status: "cancelled" });
+    reload();
   };
 
-  const handleOpenNew = () => {
-    setEditTarget(undefined);
-    setShowForm(true);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditTarget(undefined);
+  const handlePosted = (id: string) => {
+    scheduleStore.update(id, {
+      status: "published",
+      publishedAt: new Date().toISOString(),
+    } as Partial<ScheduledPost>);
+    reload();
   };
 
   return (
@@ -100,27 +81,18 @@ export default function SchedulePage() {
         title="予約投稿"
         description="投稿日時を設定してスケジュール管理"
         actions={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchPosts}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
-              title="更新"
-            >
-              <RefreshCw size={15} />
-            </button>
-            <button
-              onClick={handleOpenNew}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
-              style={{
-                background: "linear-gradient(135deg, #4f8ef7, #9b59f5)",
-                color: "white",
-                boxShadow: "0 0 16px rgba(79,142,247,0.3)",
-              }}
-            >
-              <Plus size={15} />
-              新規予約
-            </button>
-          </div>
+          <button
+            onClick={() => { setEditTarget(undefined); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+            style={{
+              background: "linear-gradient(135deg, #4f8ef7, #9b59f5)",
+              color: "white",
+              boxShadow: "0 0 16px rgba(79,142,247,0.3)",
+            }}
+          >
+            <Plus size={15} />
+            新規予約
+          </button>
         }
       />
 
@@ -160,31 +132,20 @@ export default function SchedulePage() {
             })}
           </div>
 
-          {loading ? (
-            <div className="flex flex-col gap-3">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl h-28 animate-pulse"
-                  style={{ background: "rgba(255,255,255,0.03)" }}
-                />
-              ))}
-            </div>
-          ) : (
-            <ScheduledPostList
-              posts={filtered}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onCancel={handleCancel}
-            />
-          )}
+          <ScheduledPostList
+            posts={filtered}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onCancel={handleCancel}
+            onPosted={handlePosted}
+          />
         </div>
 
         {/* Right: form */}
         {showForm && (
           <ScheduleForm
             editTarget={editTarget}
-            onClose={handleCloseForm}
+            onClose={() => { setShowForm(false); setEditTarget(undefined); }}
             onSaved={handleSaved}
           />
         )}

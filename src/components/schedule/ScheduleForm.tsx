@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CalendarClock, Save, Loader2 } from "lucide-react";
+import { scheduleStore } from "@/lib/schedule-store";
 import type { ScheduledPost } from "@/types/scheduled-post";
 
 const BEST_TIMES = [
@@ -56,30 +57,21 @@ export default function ScheduleForm({ editTarget, onClose, onSaved }: ScheduleF
     setError(null);
   }, [editTarget]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!content.trim() || !date || !time) return;
     setLoading(true);
     setError(null);
 
     try {
       const scheduledAt = toISOString(date, time);
-      const url = isEdit
-        ? `/api/scheduled-posts/${editTarget!.id}`
-        : "/api/scheduled-posts";
-      const method = isEdit ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, scheduledAt }),
-      });
-
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? `HTTP ${res.status}`);
+      let saved: ScheduledPost;
+      if (isEdit) {
+        const result = scheduleStore.update(editTarget!.id, { content, scheduledAt });
+        if (!result) throw new Error("更新に失敗しました");
+        saved = result;
+      } else {
+        saved = scheduleStore.create({ content, scheduledAt });
       }
-
-      const saved: ScheduledPost = await res.json();
       onSaved(saved);
     } catch (err) {
       setError(err instanceof Error ? err.message : "保存に失敗しました");
