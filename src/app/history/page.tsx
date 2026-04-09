@@ -6,15 +6,23 @@ import HistoryFilter from "@/components/history/HistoryFilter";
 import HistoryPostCard from "@/components/history/HistoryPostCard";
 import { dummyPosts } from "@/lib/dummy-data";
 import type { Post, PostStatus } from "@/types";
+import type { ScheduledPost } from "@/types/scheduled-post";
 
 const STORAGE_KEY = "historyPosts";
 
-function loadPosts(): Post[] {
+function loadLocalPosts(): Post[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved) as Post[];
+    if (saved) {
+      // localStorageにある場合、scheduled以外だけ使う（予約中はAPIから取得）
+      const posts = JSON.parse(saved) as Post[];
+      return posts.filter((p) => p.status !== "scheduled");
+    }
   } catch {}
-  return dummyPosts;
+  // 初回：dummyPostsのscheduled以外だけ保存
+  const nonScheduled = dummyPosts.filter((p) => p.status !== "scheduled");
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(nonScheduled)); } catch {}
+  return nonScheduled;
 }
 
 function savePosts(posts: Post[]) {
@@ -23,24 +31,51 @@ function savePosts(posts: Post[]) {
   } catch {}
 }
 
+// ScheduledPostをPost形式に変換
+function toPost(sp: ScheduledPost): Post {
+  return {
+    id: sp.id,
+    content: sp.content,
+    status: "scheduled",
+    scheduledAt: sp.scheduledAt,
+    publishedAt: sp.publishedAt,
+    likes: 0,
+    retweets: 0,
+    replies: 0,
+    impressions: 0,
+  };
+}
+
 export default function HistoryPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [localPosts, setLocalPosts] = useState<Post[]>([]);
+  const [scheduledPosts, setScheduledPosts] = useState<Post[]>([]);
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<PostStatus | "all">("all");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    setPosts(loadPosts());
+    setLocalPosts(loadLocalPosts());
     setMounted(true);
+
+    // 予約中は予約ページのAPIから取得
+    fetch("/api/scheduled-posts?status=scheduled")
+      .then((r) => r.json())
+      .then((data: ScheduledPost[]) => {
+        if (Array.isArray(data)) setScheduledPosts(data.map(toPost));
+      })
+      .catch(() => {});
   }, []);
 
+  // 全投稿 = localPosts(published/draft) + scheduledPosts
+  const allPosts = [...localPosts, ...scheduledPosts];
+
   const handleDelete = (id: string) => {
-    const next = posts.filter((p) => p.id !== id);
-    setPosts(next);
+    const next = localPosts.filter((p) => p.id !== id);
+    setLocalPosts(next);
     savePosts(next);
   };
 
-  const filtered = posts.filter((p) => {
+  const filtered = allPosts.filter((p) => {
     if (status !== "all" && p.status !== status) return false;
     if (search && !p.content.includes(search)) return false;
     return true;
@@ -78,7 +113,7 @@ export default function HistoryPage() {
               <HistoryPostCard
                 key={post.id}
                 post={post}
-                onDelete={handleDelete}
+                onDelete={post.status !== "scheduled" ? handleDelete : undefined}
               />
             ))}
           </div>
