@@ -45,11 +45,13 @@ export default function PersonaForm({ initial, onSave, onClose }: PersonaFormPro
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-20"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ paddingBottom: "80px" }}
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
     >
       <div
-        className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-5 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md rounded-2xl p-6 flex flex-col gap-5 overflow-y-auto"
+        style={{ maxHeight: "calc(100vh - 100px)" }}
         style={{
           background: "#0f0f1a",
           border: "1px solid rgba(79,142,247,0.25)",
