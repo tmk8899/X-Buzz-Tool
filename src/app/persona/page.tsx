@@ -14,9 +14,14 @@ export default function PersonaPage() {
   const [editTarget, setEditTarget] = useState<Character | undefined>(undefined);
 
   const handleSelect = (id: string) => {
-    setCharacters((prev) =>
-      prev.map((c) => ({ ...c, isActive: c.id === id }))
-    );
+    setCharacters((prev) => {
+      const next = prev.map((c) => ({ ...c, isActive: c.id === id }));
+      const active = next.find((c) => c.isActive);
+      if (active) {
+        localStorage.setItem("activePersona", JSON.stringify({ name: active.name, tone: active.tone, topics: active.topics }));
+      }
+      return next;
+    });
   };
 
   const handleEdit = (character: Character) => {

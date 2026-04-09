@@ -50,6 +50,9 @@ ${input.maxChars}文字前後
 【投稿パターン候補（各案で異なる型を使うこと）】
 ${patternText}
 
+【ペルソナ（発信者のキャラクター）】
+${input.persona ? `名前: ${input.persona.name}\nトーン・スタイル: ${input.persona.tone || "指定なし"}` : "指定なし"}
+
 【追加指示】
 ${input.customInstruction || "なし"}
 

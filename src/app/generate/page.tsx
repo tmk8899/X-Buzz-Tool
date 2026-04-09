@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import GenerateForm from "@/components/generate/GenerateForm";
@@ -22,6 +22,17 @@ export default function GeneratePage() {
   const [results, setResults] = useState<GeneratedPostResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // アクティブなペルソナを localStorage から読み込む
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("activePersona");
+      if (stored) {
+        const persona = JSON.parse(stored);
+        setInput((prev) => ({ ...prev, persona }));
+      }
+    } catch {}
+  }, []);
 
   const handleChange = (partial: Partial<GeneratePostInput>) => {
     setInput((prev) => ({ ...prev, ...partial }));
