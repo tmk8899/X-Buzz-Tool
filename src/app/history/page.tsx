@@ -18,7 +18,7 @@ export default function HistoryPage() {
   });
 
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       <PageHeader
         title="投稿履歴"
         description="過去のすべての投稿を確認・分析"

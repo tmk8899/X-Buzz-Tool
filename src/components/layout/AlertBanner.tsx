@@ -15,7 +15,7 @@ export default function AlertBanner({ message, cta }: AlertBannerProps) {
 
   return (
     <div
-      className="rounded-2xl px-5 py-4 flex items-center gap-4 mb-8"
+      className="rounded-2xl px-4 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-8"
       style={{
         background: "linear-gradient(135deg, rgba(79,142,247,0.12), rgba(155,89,245,0.10))",
         border: "1px solid rgba(79,142,247,0.25)",
@@ -34,7 +34,7 @@ export default function AlertBanner({ message, cta }: AlertBannerProps) {
       {cta && (
         <a
           href={cta.href}
-          className="shrink-0 text-xs font-semibold px-4 py-2 rounded-lg transition-all hover:opacity-90"
+          className="shrink-0 text-xs font-semibold px-4 py-2 rounded-lg transition-all hover:opacity-90 self-start sm:self-auto"
           style={{
             background: "linear-gradient(135deg, #4f8ef7, #9b59f5)",
             color: "white",

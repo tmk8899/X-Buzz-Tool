@@ -7,7 +7,7 @@ import { dummyStats, dummyPosts } from "@/lib/dummy-data";
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       {/* Title */}
       <PageHeader
         title="ダッシュボード"

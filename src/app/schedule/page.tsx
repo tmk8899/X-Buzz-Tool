@@ -95,7 +95,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       <PageHeader
         title="予約投稿"
         description="投稿日時を設定してスケジュール管理"

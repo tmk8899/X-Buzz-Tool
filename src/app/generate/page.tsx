@@ -55,7 +55,7 @@ export default function GeneratePage() {
   };
 
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       <PageHeader
         title="AI投稿生成"
         description="テーマ・ターゲット・目的を入力してバズる投稿を3パターン自動生成"

@@ -16,7 +16,7 @@ export default function PersonaPage() {
   };
 
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       <PageHeader
         title="ペルソナ設定"
         description="投稿キャラクターのトーンとスタイルを管理"
