@@ -27,8 +27,29 @@ export async function POST(req: NextRequest) {
       id: tweet.data.id,
       text: tweet.data.text,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "エラーが発生しました";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (err: unknown) {
+    // X API エラーコードに応じたメッセージ
+    let message = "エラーが発生しました";
+    let code = 500;
+
+    if (err && typeof err === "object") {
+      const e = err as Record<string, unknown>;
+      const status = (e.code as number) ?? (e.status as number) ?? 0;
+
+      if (status === 401) {
+        message = "認証エラー：APIキーまたはアクセストークンが無効です。Vercelの環境変数を確認してください。";
+        code = 401;
+      } else if (status === 402 || status === 403) {
+        message = "権限エラー：アプリの投稿権限が「Read and Write」になっていません。X Developer Portalでアプリ設定を変更し、アクセストークンを再発行してください。";
+        code = 403;
+      } else if (status === 429) {
+        message = "レート制限：しばらく時間をおいてから再試行してください。";
+        code = 429;
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+    }
+
+    return NextResponse.json({ error: message }, { status: code });
   }
 }
