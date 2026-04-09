@@ -275,7 +275,7 @@ const patternPool = [
   "ストーリー型",
   "チェックリスト型",
   "結論先出し型",
-] as const;
+];
 
 function pickRandomItems<T>(arr: T[], count: number): T[] {
   const copy = [...arr];
