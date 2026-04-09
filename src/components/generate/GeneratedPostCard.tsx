@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Check, CalendarClock, Hash, Zap, BookOpen } from "lucide-react";
+import { Copy, Check, CalendarClock, Hash, Zap, BookOpen, Send, Loader2 } from "lucide-react";
 import { useState } from "react";
 import type { GeneratedPostResult } from "@/types/generate";
 import NeonBadge from "@/components/ui/NeonBadge";
@@ -13,6 +13,30 @@ interface GeneratedPostCardProps {
 export default function GeneratedPostCard({ result, index }: GeneratedPostCardProps) {
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [posted, setPosted] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
+
+  const handlePost = async () => {
+    const stored = localStorage.getItem("xAccountConfig");
+    if (!stored) { setPostError("設定ページでXアカウントを設定してください"); return; }
+    const creds = JSON.parse(stored);
+    if (!creds.apiKey) { setPostError("APIキーが設定されていません"); return; }
+
+    const text = [result.hook, result.body, result.cta].filter(Boolean).join("\n\n");
+    setPosting(true);
+    setPostError(null);
+    try {
+      const res = await fetch("/api/x/post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creds, text }),
+      });
+      const data = await res.json();
+      if (data.error) { setPostError(data.error); } else { setPosted(true); }
+    } catch { setPostError("投稿に失敗しました"); }
+    finally { setPosting(false); }
+  };
 
   const handleCopy = async () => {
     const text = [result.hook, result.body, result.cta]
@@ -135,15 +159,21 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
           予約投稿へ
         </button>
         <button
-          className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80 ml-auto"
-          style={{
-            background: "rgba(155,89,245,0.1)",
-            border: "1px solid rgba(155,89,245,0.25)",
-            color: "#b57bf7",
-          }}
+          onClick={handlePost}
+          disabled={posting || posted}
+          className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80 ml-auto disabled:opacity-50"
+          style={
+            posted
+              ? { background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" }
+              : { background: "rgba(29,161,242,0.1)", border: "1px solid rgba(29,161,242,0.3)", color: "#38bdf8" }
+          }
         >
-          保存
+          {posting ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+          {posted ? "投稿済み！" : posting ? "投稿中..." : "Xに投稿"}
         </button>
+        {postError && (
+          <p className="w-full text-[10px] text-red-400 mt-1">{postError}</p>
+        )}
       </div>
     </div>
   );
