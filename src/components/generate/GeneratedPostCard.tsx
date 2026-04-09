@@ -2,6 +2,7 @@
 
 import { Copy, Check, CalendarClock, Hash, Zap, BookOpen } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import type { GeneratedPostResult } from "@/types/generate";
 import NeonBadge from "@/components/ui/NeonBadge";
 
@@ -137,7 +138,8 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
           {copied ? "コピー済み" : "コピー"}
         </button>
 
-        <button
+        <Link
+          href="/schedule"
           className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80"
           style={{
             background: "rgba(79,142,247,0.1)",
@@ -147,7 +149,7 @@ export default function GeneratedPostCard({ result, index }: GeneratedPostCardPr
         >
           <CalendarClock size={12} />
           予約投稿へ
-        </button>
+        </Link>
 
         {/* Xに投稿：Web Intentで開く（API不要） */}
         <button
