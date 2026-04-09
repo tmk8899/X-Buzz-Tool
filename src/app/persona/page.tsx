@@ -9,7 +9,16 @@ import { dummyCharacters } from "@/lib/dummy-data";
 import type { Character } from "@/types";
 
 export default function PersonaPage() {
-  const [characters, setCharacters] = useState<Character[]>(dummyCharacters);
+  const [characters, setCharacters] = useState<Character[]>(() => {
+    // 初期表示時にアクティブペルソナをlocalStorageへ保存
+    if (typeof window !== "undefined") {
+      const active = dummyCharacters.find((c) => c.isActive);
+      if (active && !localStorage.getItem("activePersona")) {
+        localStorage.setItem("activePersona", JSON.stringify({ name: active.name, tone: active.tone, topics: active.topics }));
+      }
+    }
+    return dummyCharacters;
+  });
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<Character | undefined>(undefined);
 
