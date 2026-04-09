@@ -1,21 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/layout/PageHeader";
 import HistoryFilter from "@/components/history/HistoryFilter";
 import HistoryPostCard from "@/components/history/HistoryPostCard";
 import { dummyPosts } from "@/lib/dummy-data";
-import type { PostStatus } from "@/types";
+import type { Post, PostStatus } from "@/types";
+
+const STORAGE_KEY = "historyPosts";
+
+function loadPosts(): Post[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved) as Post[];
+  } catch {}
+  return dummyPosts;
+}
+
+function savePosts(posts: Post[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  } catch {}
+}
 
 export default function HistoryPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<PostStatus | "all">("all");
   const [search, setSearch] = useState("");
 
-  const filtered = dummyPosts.filter((p) => {
+  useEffect(() => {
+    setPosts(loadPosts());
+    setMounted(true);
+  }, []);
+
+  const handleDelete = (id: string) => {
+    const next = posts.filter((p) => p.id !== id);
+    setPosts(next);
+    savePosts(next);
+  };
+
+  const filtered = posts.filter((p) => {
     if (status !== "all" && p.status !== status) return false;
     if (search && !p.content.includes(search)) return false;
     return true;
   });
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-full p-4 lg:p-8">
@@ -44,7 +75,11 @@ export default function HistoryPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((post) => (
-              <HistoryPostCard key={post.id} post={post} />
+              <HistoryPostCard
+                key={post.id}
+                post={post}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
