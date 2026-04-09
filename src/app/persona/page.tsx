@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import PersonaCard from "@/components/persona/PersonaCard";
 import PersonaForm from "@/components/persona/PersonaForm";
+import XAccountSettings from "@/components/settings/XAccountSettings";
 import { dummyCharacters } from "@/lib/dummy-data";
 import type { Character } from "@/types";
 
@@ -87,6 +88,8 @@ export default function PersonaPage() {
           </button>
         }
       />
+
+      <XAccountSettings />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {characters.map((char) => (
