@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, CalendarClock, History, UserCircle2 } from "lucide-react";
+import { LayoutDashboard, Sparkles, CalendarClock, History, UserCircle2, RefreshCw } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "ホーム" },
   { href: "/generate", icon: Sparkles, label: "生成" },
+  { href: "/rewrite", icon: RefreshCw, label: "リライト" },
   { href: "/schedule", icon: CalendarClock, label: "予約" },
   { href: "/history", icon: History, label: "履歴" },
   { href: "/persona", icon: UserCircle2, label: "設定" },
@@ -30,11 +31,11 @@ export default function BottomNav() {
           <Link
             key={href}
             href={href}
-            className="flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all"
-            style={{ minWidth: 52 }}
+            className="flex flex-col items-center gap-1 px-1 py-1 rounded-xl transition-all"
+            style={{ minWidth: 44 }}
           >
             <Icon
-              size={20}
+              size={19}
               style={{ color: isActive ? "#4f8ef7" : "#475569" }}
             />
             <span
