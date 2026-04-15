@@ -6,34 +6,37 @@ import PageHeader from "@/components/layout/PageHeader";
 import RewriteInput from "@/components/rewrite/RewriteInput";
 import RewriteResult from "@/components/rewrite/RewriteResult";
 
-const DUMMY_REWRITE = `【たった1つの習慣で月収が2倍になった話】
-
-フリーランス2年目の自分が実践した方法を公開します。
-
-複雑なことは何もしていない。
-毎朝30分、「自分の実績」を言語化するだけ。
-
-これを続けたら勝手に仕事が来るようになった。
-
-スキルより「見え方」の時代。
-発信しないのは存在しないのと同じです。`;
-
 export default function RewritePage() {
   const [original, setOriginal] = useState("");
   const [goal, setGoal] = useState("viral");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRewrite = async () => {
     if (!original.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setResult(DUMMY_REWRITE);
-    setLoading(false);
+    setError(null);
+    setResult(null);
+
+    try {
+      const res = await fetch("/api/rewrite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ original, goal }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setResult(data.rewritten);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "リライトに失敗しました");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-full p-8">
+    <div className="min-h-full p-4 lg:p-8">
       <PageHeader
         title="リライト"
         description="既存の投稿をAIで改善・バズ仕様に書き直し"
@@ -53,6 +56,13 @@ export default function RewritePage() {
             onOriginalChange={setOriginal}
             onGoalChange={setGoal}
           />
+
+          {error && (
+            <p className="text-sm text-red-400 px-3 py-2 rounded-xl"
+              style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}>
+              {error}
+            </p>
+          )}
 
           <button
             onClick={handleRewrite}
