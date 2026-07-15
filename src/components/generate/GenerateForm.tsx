@@ -248,14 +248,17 @@ export default function GenerateForm({ input, loading, onChange, onSubmit }: Gen
             <input
               type="range"
               min={60}
-              max={280}
-              step={10}
+              max={2000}
+              step={20}
               value={input.maxChars}
               onChange={(e) => onChange({ maxChars: Number(e.target.value) })}
               className="flex-1 accent-blue-500"
             />
-            <span className="text-sm font-medium text-white w-10 text-right">{input.maxChars}</span>
+            <span className="text-sm font-medium text-white w-12 text-right">{input.maxChars}</span>
           </div>
+          <p className="text-[10px] text-slate-500">
+            Xは現在ロングポストに対応（無料でも数千文字、Premium+は最大25,000文字）。滞在時間を稼ぎたいテーマは長めに。
+          </p>
         </div>
         <div className="flex flex-col gap-2">
           <FieldLabel>CTA（行動促進）</FieldLabel>
