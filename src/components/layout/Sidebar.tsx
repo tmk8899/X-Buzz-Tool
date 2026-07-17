@@ -13,6 +13,7 @@ import {
   ChevronRight,
   RefreshCw,
   BookMarked,
+  Gift,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/schedule", icon: CalendarClock, label: "予約投稿" },
   { href: "/history", icon: History, label: "投稿履歴" },
   { href: "/rewrite", icon: RefreshCw, label: "リライト" },
+  { href: "/gacha", icon: Gift, label: "女神ガチャ" },
   { href: "/persona", icon: UserCircle2, label: "ペルソナ設定" },
   { href: "/notebook", icon: BookOpen, label: "ノートブック" },
   { href: "/guide", icon: BookMarked, label: "使い方ガイド" },

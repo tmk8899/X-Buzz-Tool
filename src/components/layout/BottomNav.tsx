@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sparkles, CalendarClock, History, UserCircle2, RefreshCw } from "lucide-react";
+import { LayoutDashboard, Sparkles, CalendarClock, History, UserCircle2, RefreshCw, Gift } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "ホーム" },
   { href: "/generate", icon: Sparkles, label: "生成" },
   { href: "/rewrite", icon: RefreshCw, label: "リライト" },
+  { href: "/gacha", icon: Gift, label: "ガチャ" },
   { href: "/schedule", icon: CalendarClock, label: "予約" },
   { href: "/history", icon: History, label: "履歴" },
   { href: "/persona", icon: UserCircle2, label: "設定" },
