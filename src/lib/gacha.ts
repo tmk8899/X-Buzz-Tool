@@ -18,8 +18,7 @@ export type GoddessColor =
   | "pink"
   | "orange"
   | "purple"
-  | "black"
-  | "white";
+  | "black";
 
 export interface GachaResult {
   capsule: CapsuleColor;
@@ -37,17 +36,16 @@ export const CAPSULE_WEIGHTS: Record<CapsuleColor, number> = {
   rainbow: 30, // レインボー 3%
 };
 
-// 8色は各0.8%（=8‰）。合計6.4%で、残り93.6%は通常色（白）の女神が降臨する
+// 8色の女神は等確率（各12.5%）。色ごとに司る運勢が異なる
 export const GODDESS_WEIGHTS: Record<GoddessColor, number> = {
-  red: 8,
-  blue: 8,
-  yellow: 8,
-  green: 8,
-  pink: 8,
-  orange: 8,
-  purple: 8,
-  black: 8,
-  white: 936,
+  red: 125,
+  blue: 125,
+  yellow: 125,
+  green: 125,
+  pink: 125,
+  orange: 125,
+  purple: 125,
+  black: 125,
 };
 
 // ------------------------------------------------------------
@@ -91,70 +89,87 @@ export const CAPSULE_META: Record<
 
 export const GODDESS_META: Record<
   GoddessColor,
-  { label: string; en: string; rate: string; color: string; quote: string }
+  {
+    label: string;
+    en: string;
+    rate: string;
+    color: string;
+    fortune: string;
+    fortuneEn: string;
+    quote: string;
+  }
 > = {
   red: {
     label: "赤の女神",
     en: "crimson-red",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#f87171",
-    quote: "情熱は、すべてを燃やし尽くすわ。",
+    fortune: "勝負運",
+    fortuneEn: "victory in battles and challenges",
+    quote: "今日のあなたに、負けはないわ。",
   },
   blue: {
     label: "青の女神",
     en: "deep-blue",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#60a5fa",
-    quote: "静けさの中にこそ、真実はあるの。",
+    fortune: "仕事運",
+    fortuneEn: "success in work and career",
+    quote: "その仕事、必ず実を結ぶわ。",
   },
   yellow: {
     label: "黄の女神",
     en: "radiant-yellow",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#facc15",
-    quote: "光あるところに、私は在る。",
+    fortune: "金運",
+    fortuneEn: "wealth and financial fortune",
+    quote: "黄金の流れは、あなたに向かっているわ。",
   },
   green: {
     label: "緑の女神",
     en: "emerald-green",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#4ade80",
-    quote: "芽吹きなさい、あなたの運命よ。",
+    fortune: "健康運",
+    fortuneEn: "health and vitality",
+    quote: "心も体も、今日は満ちているわ。",
   },
   pink: {
     label: "ピンクの女神",
     en: "blossom-pink",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#f472b6",
-    quote: "愛こそが、最強の祝福よ。",
+    fortune: "恋愛運",
+    fortuneEn: "love and romance",
+    quote: "今日、愛はあなたに微笑むわ。",
   },
   orange: {
     label: "オレンジの女神",
     en: "sunset-orange",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#fb923c",
-    quote: "夜明けは、あなたのためにあるの。",
+    fortune: "家族運",
+    fortuneEn: "family harmony and bonds",
+    quote: "大切な人との時間を、忘れないでね。",
   },
   purple: {
     label: "紫の女神",
     en: "mystic-purple",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#c084fc",
-    quote: "秘めたる力、いま解き放ちなさい。",
+    fortune: "出世運",
+    fortuneEn: "promotion and rising status",
+    quote: "頂へ続く扉は、もう開いているわ。",
   },
   black: {
     label: "黒の女神",
     en: "obsidian-black",
-    rate: "0.8%",
+    rate: "12.5%",
     color: "#94a3b8",
-    quote: "闇もまた、私の翼のひとつ。",
-  },
-  white: {
-    label: "白の女神",
-    en: "pure-white",
-    rate: "93.6%",
-    color: "#f1f5f9",
-    quote: "また会えたわね。今日も良い一日を。",
+    fortune: "はずれ（無理せずに1日を過ごす）",
+    fortuneEn: "a miss — take it easy and rest today",
+    quote: "今日は無理をしないで。ゆっくり過ごしなさい。",
   },
 };
 
@@ -209,7 +224,7 @@ export function buildVideoPrompt(result: GachaResult): {
 ${capsule.label}のカプセルが上下2つにパカッと開き、中から画面全体が白く飛ぶほどの眩い光が放たれる。
 
 ■ カット4（0:03–0:04）女神降臨
-光が収まると、${goddess.label}（${goddess.en}）が丸い台座の上にストンと上から降り立つ。カメラが女神の顔にクローズアップし、女神が一言つぶやく——
+光が収まると、${goddess.label}（${goddess.en}）が丸い台座の上にストンと上から降り立つ。女神は${goddess.label.replace("の女神", "")}を基調とした、宝石と金の細工をふんだんにあしらった半透明のシルクのドレスをまとい、頭には同色のクリスタルが連なる王冠を戴くアニメ調の美しい姿。${goddess.fortune}を司る女神である。カメラが女神の顔にクローズアップし、女神が一言つぶやく——
 「${goddess.quote}」`;
 
   const en = `[Goddess Gacha — 4-second short film, 4 shots, 1 second each]
@@ -222,9 +237,9 @@ Shot 2 (0:01–0:02) — Close-up: the machine's large dial turns with a satisfy
 
 Shot 3 (0:02–0:03) — The ${capsule.en} capsule pops open into two halves, releasing a blinding, screen-flooding burst of divine light.
 
-Shot 4 (0:03–0:04) — As the light fades, a ${goddess.en} goddess gently drops from above and lands softly on a round pedestal. The camera pushes into a close-up of her face as she speaks a single line: "${goddess.quote}"
+Shot 4 (0:03–0:04) — As the light fades, a beautiful anime-style ${goddess.en} goddess gently drops from above and lands softly on a round pedestal. She wears an ornate ${goddess.en} gown of layered translucent silk laced with gold filigree and matching jewels, and a spiked crystal crown in the same color. She is the goddess of ${goddess.fortuneEn}. The camera pushes into a close-up of her face as she speaks a single line: "${goddess.quote}"
 
-Style: cinematic, hyper-detailed, dramatic volumetric lighting, 4K.`;
+Style: cinematic anime, hyper-detailed, dramatic volumetric lighting, 4K.`;
 
   return { ja, en };
 }

@@ -193,6 +193,16 @@ export default function GachaPage() {
                   style={{ background: "rgba(255,255,255,0.12)" }}
                 />
               </div>
+              <span
+                className="px-4 py-1.5 rounded-full text-sm font-bold"
+                style={{
+                  color: "#0b0b18",
+                  background: goddess.color,
+                  boxShadow: `0 0 20px ${goddess.color}55`,
+                }}
+              >
+                今日の運勢: {goddess.fortune}
+              </span>
               <p
                 className="text-base font-semibold text-center"
                 style={{ color: goddess.color }}
