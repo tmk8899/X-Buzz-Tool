@@ -199,6 +199,58 @@ export function drawGacha(rng: () => number = Math.random): GachaResult {
 }
 
 // ------------------------------------------------------------
+// 動画演出用の事前生成クリップ
+//
+// public/videos/gacha/ に以下の13本のmp4を置くと、ガチャ結果に
+// 合わせてページ上で連続再生される（無い場合はCSS演出にフォールバック）:
+//   intro.mp4 / capsule-{gold|silver|bronze|rainbow}.mp4 /
+//   goddess-{red|blue|...|black}.mp4
+// 各クリップの生成用プロンプトは buildAssetPrompts() が出力する
+// ------------------------------------------------------------
+
+export const VIDEO_BASE = "/videos/gacha";
+
+export function videoSequence(result: GachaResult): string[] {
+  return [
+    `${VIDEO_BASE}/intro.mp4`,
+    `${VIDEO_BASE}/capsule-${result.capsule}.mp4`,
+    `${VIDEO_BASE}/goddess-${result.goddess}.mp4`,
+  ];
+}
+
+const CLIP_STYLE =
+  "Cinematic anime, hyper-detailed, dramatic volumetric lighting, 4K.";
+
+export function buildAssetPrompts(): {
+  intro: { file: string; prompt: string };
+  capsules: { file: string; label: string; prompt: string }[];
+  goddesses: { file: string; label: string; prompt: string }[];
+} {
+  return {
+    intro: {
+      file: "intro.mp4",
+      prompt:
+        "Dynamic forward-moving camera rushes up a grand 30-step staircase, about 5 meters wide, covered in a deep crimson carpet, from the very bottom toward a giant gacha capsule machine the size of a crane game waiting at the top. Solemn, temple-like atmosphere. " +
+        CLIP_STYLE,
+    },
+    capsules: (Object.keys(CAPSULE_META) as CapsuleColor[]).map((c) => ({
+      file: `capsule-${c}.mp4`,
+      label: CAPSULE_META[c].label,
+      prompt:
+        `Close-up of a giant gacha capsule machine. Its large dial turns with a satisfying clunk, and a ${CAPSULE_META[c].en} capsule tumbles out of the dispenser slot. The capsule then pops open into two halves, releasing a blinding, screen-flooding burst of divine light. ` +
+        CLIP_STYLE,
+    })),
+    goddesses: (Object.keys(GODDESS_META) as GoddessColor[]).map((g) => ({
+      file: `goddess-${g}.mp4`,
+      label: GODDESS_META[g].label,
+      prompt:
+        `As a blinding divine light fades, a beautiful anime-style ${GODDESS_META[g].en} goddess gently drops from above and lands softly on a round pedestal. She wears an ornate ${GODDESS_META[g].en} gown of layered translucent silk laced with gold filigree and matching jewels, and a spiked crystal crown in the same color. She is the goddess of ${GODDESS_META[g].fortuneEn}. The camera pushes into a close-up of her face as she speaks a single line in Japanese: "${GODDESS_META[g].quote}" ` +
+        CLIP_STYLE,
+    })),
+  };
+}
+
+// ------------------------------------------------------------
 // 映像生成AI用プロンプト（日本語 / 英語）
 // ------------------------------------------------------------
 

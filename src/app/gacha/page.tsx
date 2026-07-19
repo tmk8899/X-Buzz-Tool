@@ -6,15 +6,17 @@ import PageHeader from "@/components/layout/PageHeader";
 import {
   drawGacha,
   buildVideoPrompt,
+  videoSequence,
+  VIDEO_BASE,
   CAPSULE_META,
   GODDESS_META,
   type CapsuleColor,
   type GachaResult,
 } from "@/lib/gacha";
 
-type Phase = "idle" | "climb" | "spin" | "open" | "reveal";
+type Phase = "idle" | "video" | "climb" | "spin" | "open" | "reveal";
 
-const PHASE_LABEL: Record<Exclude<Phase, "idle" | "reveal">, string> = {
+const PHASE_LABEL: Record<Exclude<Phase, "idle" | "video" | "reveal">, string> = {
   climb: "① 真紅の大階段を駆け上がる…",
   spin: "② ハンドルを回してガチャを引く…",
   open: "③ カプセルが眩い光とともに開く…",
@@ -30,6 +32,10 @@ export default function GachaPage() {
     rainbow: 0,
   });
   const [copied, setCopied] = useState<"ja" | "en" | null>(null);
+  // 事前生成した動画クリップが public/videos/gacha/ に置かれているか
+  const [hasVideos, setHasVideos] = useState(false);
+  const [clipQueue, setClipQueue] = useState<string[]>([]);
+  const [clipIndex, setClipIndex] = useState(0);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -37,23 +43,47 @@ export default function GachaPage() {
     return () => pending.forEach(clearTimeout);
   }, []);
 
+  useEffect(() => {
+    fetch(`${VIDEO_BASE}/intro.mp4`, { method: "HEAD" })
+      .then((res) =>
+        setHasVideos(
+          res.ok &&
+            (res.headers.get("content-type")?.startsWith("video") ?? false),
+        ),
+      )
+      .catch(() => setHasVideos(false));
+  }, []);
+
+  const reveal = (drawn: GachaResult) => {
+    setPhase("reveal");
+    setCounts((prev) => ({
+      ...prev,
+      [drawn.capsule]: prev[drawn.capsule] + 1,
+    }));
+  };
+
+  // 動画素材が無いときのCSSアニメーション演出（各カット1秒）
+  const startCssSequence = (drawn: GachaResult) => {
+    setPhase("climb");
+    timers.current.push(
+      setTimeout(() => setPhase("spin"), 1000),
+      setTimeout(() => setPhase("open"), 2000),
+      setTimeout(() => reveal(drawn), 3000),
+    );
+  };
+
   const handlePull = () => {
     const drawn = drawGacha();
     setResult(drawn);
     setCopied(null);
-    setPhase("climb");
-    // 各カット1秒ずつ演出してから結果を公開する
-    timers.current.push(
-      setTimeout(() => setPhase("spin"), 1000),
-      setTimeout(() => setPhase("open"), 2000),
-      setTimeout(() => {
-        setPhase("reveal");
-        setCounts((prev) => ({
-          ...prev,
-          [drawn.capsule]: prev[drawn.capsule] + 1,
-        }));
-      }, 3000),
-    );
+    if (hasVideos) {
+      // 導入→カプセル→女神の3クリップを結果に合わせて連続再生
+      setClipQueue(videoSequence(drawn));
+      setClipIndex(0);
+      setPhase("video");
+    } else {
+      startCssSequence(drawn);
+    }
   };
 
   const handleCopy = async (lang: "ja" | "en") => {
@@ -63,7 +93,11 @@ export default function GachaPage() {
     timers.current.push(setTimeout(() => setCopied(null), 2000));
   };
 
-  const isPulling = phase === "climb" || phase === "spin" || phase === "open";
+  const isPulling =
+    phase === "video" ||
+    phase === "climb" ||
+    phase === "spin" ||
+    phase === "open";
   const capsule = result ? CAPSULE_META[result.capsule] : null;
   const goddess = result ? GODDESS_META[result.goddess] : null;
   const prompt = result ? buildVideoPrompt(result) : null;
@@ -101,7 +135,37 @@ export default function GachaPage() {
                 <br />
                 その頂上に、巨大なガチャガチャが待っている——
               </p>
+              {!hasVideos && (
+                <p className="text-[11px] text-slate-600 text-center">
+                  ※ public/videos/gacha/ に動画素材を置くと、抽選結果に合わせた
+                  <br />
+                  実際の映像が再生されます（詳細は docs/gacha-video-assets.md）
+                </p>
+              )}
             </>
+          )}
+
+          {phase === "video" && clipQueue.length > 0 && (
+            <video
+              key={clipQueue[clipIndex]}
+              src={clipQueue[clipIndex]}
+              autoPlay
+              playsInline
+              className="w-full rounded-xl"
+              style={{ maxHeight: 360, objectFit: "cover" }}
+              onEnded={() => {
+                if (clipIndex < clipQueue.length - 1) {
+                  setClipIndex((i) => i + 1);
+                } else if (result) {
+                  reveal(result);
+                }
+              }}
+              onError={() => {
+                // クリップが欠けている場合はCSS演出に切り替える
+                setHasVideos(false);
+                if (result) startCssSequence(result);
+              }}
+            />
           )}
 
           {phase === "climb" && (
@@ -148,9 +212,9 @@ export default function GachaPage() {
             />
           )}
 
-          {isPulling && (
+          {(phase === "climb" || phase === "spin" || phase === "open") && (
             <p className="text-sm font-medium text-slate-300">
-              {PHASE_LABEL[phase as keyof typeof PHASE_LABEL]}
+              {PHASE_LABEL[phase]}
             </p>
           )}
 
